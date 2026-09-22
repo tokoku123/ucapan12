@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1, h2, h3, .fredoka {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Gift Box Styles */
+        .gift-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .gift-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .gift-wrapper:hover .gift-lid {
+            transform: translateY(-5px) rotate(2deg);
+        }
+
+        .gift-box {
+            width: 150px;
+            height: 120px;
+            background-color: #ff4757;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .gift-ribbon-vertical {
+            position: absolute;
+            width: 30px;
+            height: 100%;
+            background-color: #feca57;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .gift-ribbon-horizontal {
+            position: absolute;
+            height: 30px;
+            width: 100%;
+            background-color: #feca57;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .gift-lid {
+            width: 170px;
+            height: 40px;
+            background-color: #ff4757;
+            border-radius: 8px;
+            position: absolute;
+            top: -40px;
+            left: -10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .gift-lid-ribbon {
+            position: absolute;
+            width: 30px;
+            height: 100%;
+            background-color: #feca57;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .bow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 20;
+        }
+
+        .bow-left, .bow-right {
+            width: 35px;
+            height: 35px;
+            border: 6px solid #feca57;
+            border-radius: 50% 50% 0 50%;
+            position: absolute;
+            top: 0;
+        }
+        
+        .bow-left {
+            left: -15px;
+            transform: rotate(45deg);
+        }
+
+        .bow-right {
+            right: -15px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+        }
+
+        .reveal-container {
+            opacity: 0;
+            transform: scale(0.5);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: absolute;
+            text-align: center;
+        }
+
+        .reveal-container.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            position: relative;
+        }
+
+        .gift-container.hidden {
+            display: none;
+        }
+
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .animate-bounce-slow {
+            animation: bounce-slow 3s infinite ease-in-out;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .gift-container {
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .gift-container.hide-gift {
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+        }
+
+        .reveal-container {
+            width: min(90vw, 672px);
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 640px) {
+            .gift-box {
+                width: 125px;
+                height: 100px;
+            }
+
+            .gift-lid {
+                width: 145px;
+                height: 36px;
+                top: -36px;
+            }
+
+            .gift-ribbon-vertical,
+            .gift-lid-ribbon {
+                width: 25px;
+            }
+
+            .gift-ribbon-horizontal {
+                height: 25px;
+            }
+        }
+    </style>
+</head>
+<body class="text-white relative">
+
+    <!-- Canvas for Confetti -->
+    <canvas id="confetti"></canvas>
+
+    <div class="container mx-auto px-4 flex flex-col items-center justify-center min-h-screen">
+        
+        <!-- Gift Section -->
+        <div id="gift-section" class="gift-container flex flex-col items-center">
+            <h2 class="text-3xl md:text-5xl font-bold mb-16 text-center shadow-black drop-shadow-lg animate-pulse fredoka text-white">
+                Ada kejutan buat kamu! 🎁
+            </h2>
+            
+            <div
+                class="gift-wrapper mt-8"
+                onclick="openGift()"
+                role="button"
+                tabindex="0"
+                aria-label="Buka kado ulang tahun"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') openGift()"
+            >
+                <div class="gift-lid">
+                    <div class="bow">
+                        <div class="bow-left"></div>
+                        <div class="bow-right"></div>
+                    </div>
+                    <div class="gift-lid-ribbon"></div>
+                </div>
+                <div class="gift-box">
+                    <div class="gift-ribbon-horizontal"></div>
+                    <div class="gift-ribbon-vertical"></div>
+                </div>
+            </div>
+            
+            <p class="mt-12 text-lg font-medium bg-white/20 px-6 py-2 rounded-full backdrop-blur-sm animate-bounce">
+                Klik kadonya! ✨
+            </p>
+        </div>
+
+        <!-- Reveal Message Section -->
+        <div id="message-section" class="reveal-container bg-white/10 backdrop-blur-md border border-white/30 p-8 md:p-12 rounded-3xl shadow-2xl max-w-2xl w-full mx-4">
+            <div class="text-7xl mb-6 animate-bounce-slow">🎂</div>
+            
+            <!-- UBAH NAMA DI SINI -->
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-yellow-300 drop-shadow-md fredoka">
+                Selamat Ulang Tahun,<br>
+                <span class="text-white">Khoirunnisa Zerlinda Mevani!</span>
+            </h1>
+            
+            <!-- UBAH PESAN DI SINI -->
+            <div class="text-lg md:text-xl leading-relaxed mb-8 font-medium">
+                <p class="mb-4">
+                    Semoga panjang umur, sehat selalu, dan semua yang kamu cita-citakan bisa tercapai di tahun ini.
+                </p>
+                <p>
+                    Terima kasih sudah menjadi teman yang luar biasa. <i>Have a blast today!</i> 🎉
+                </p>
+            </div>
+            
+            <button onclick="location.reload()" class="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95">
+                Tutup Kado 🎀
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Confetti Logic ---
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#feca57', '#ff4757', '#1dd1a1', '#5f27cd', '#54a0ff', '#ff9f43'];
+
+        function createParticles() {
+            const particleCount = 150;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: Math.random() * 10 - 5
+                });
+            }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                
+                // Randomize shape (circle or rect)
+                if (index % 2 === 0) {
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+
+                // Update position
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.rotation += p.rotationSpeed;
+
+                // Reset particle if it falls off screen
+                if (p.y > canvas.height) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(drawParticles);
+        }
+
+        // Handle window resize for canvas
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // --- Interaction Logic ---
+        function openGift() {
+            const giftSection = document.getElementById('gift-section');
+            const messageSection = document.getElementById('message-section');
+            
+            // Add slight delay for animation effect
+            setTimeout(() => {
+                giftSection.classList.add('hidden');
+                messageSection.classList.add('active');
+                
+                // Start confetti!
+                createParticles();
+                drawParticles();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
